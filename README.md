@@ -6,7 +6,7 @@ RestApi link : https://developer.atlassian.com/server/jira/platform/rest-apis/
 In this App you can see all the neccesary information about the issue and also can change the status from TO-DO to Done with comment.
 
 # Data Storage
-Now data is being stored on supabase server. Also you can see data on you UI.
+Now data is being stored on supabase server. Also you can see data on your UI.
 
 # How to Install and Run the Project
 
