@@ -5,11 +5,14 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import MainFile from './components/mainFile';
 import 'bootstrap/dist/css/bootstrap.css'
+import { BrowserRouter } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
+    <BrowserRouter>
     <MainFile/>
+    </BrowserRouter>
   </React.StrictMode>
 );
 

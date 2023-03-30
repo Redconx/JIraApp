@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function MainFile() {
   const [displayData,setData] = useState([]);
   const [comment,setComment]=useState("");
   const [ind,setInd]=useState(-1)
+  const [prevPage,setPrevPage]=useState('')
+  const [nextPage,setNextPage]=useState('')
+  const [total,setTotal]=useState('')
+  const navigate = useNavigate();
 
-  const fetchAllIssue = async () => {
-   let response=await axios.get("http://localhost:2410/issues")
+  const fetchAllIssue = async (searchstr ='') => {
+   let response=await axios.get(`http://localhost:2410/issues?${searchstr}`)
     console.log(response.data)
-    setData(response.data)
+    setData(response.data.items)
+    setPrevPage(response.data.previousPage)
+    setNextPage(response.data.nextPage)
+    setTotal(response.data.totalPages)
   };
 
   useEffect(() => {
@@ -23,13 +31,43 @@ export default function MainFile() {
     } 
     await axios.post('http://localhost:2410/changeStatus',{comment,key})
     setComment("")
-    fetchAllIssue();
-
+    let searchStr = makeSearchString({page:prevPage+1||nextPage-1});
+    fetchAllIssue(searchStr);
   }
+
+
   const handleComment=(e,index)=>{
     setInd(index)
     setComment(e.currentTarget.value)
   }
+
+  const reFetchIssue=()=>{
+    callURL(`/`,{page:'1'})
+  }
+
+  const onChange=(options)=>{
+    callURL(`/`,options);
+  }
+const callURL = (url, options) => {
+    let searchStr = makeSearchString(options);
+    fetchAllIssue(searchStr)
+    navigate({ pathname: url, search: searchStr });
+  };
+const makeSearchString = (options) => {
+    let { page } = options;
+    let searchString = "";
+    searchString = addToQueryString(searchString, "page", page);
+    return searchString;
+  };
+  const addToQueryString = (str, paramName, paramValue) =>
+  paramValue
+    ? str
+      ? `${str}&${paramName}=${paramValue}`
+      : `${paramName}=${paramValue}`
+    : str;
+
+
+
   return (
   <div className="container">
         <div className="row bg-dark text-white text-center">
@@ -63,6 +101,16 @@ export default function MainFile() {
                 </div>
             </div>
         ))}
-        <button className="btn btn-info m-2" onClick={fetchAllIssue}>Fetch Data</button>
+
+
+<div className="row">
+  <div className="col-2">{prevPage && <button className="btn btn-success btn-sm m-3" onClick={()=>onChange({page:prevPage})}>Prev</button>}</div>
+  <div className="col-8 text-center pt-3" style={{fontSize:'14px'}}>
+  Page {prevPage+1||nextPage-1} of {total}
+  </div>
+  <div className="col-2">{nextPage && <button className="btn btn-success btn-sm m-3" onClick={()=>onChange({page:nextPage})}>Next</button>}</div>
+</div>
+
+<button className="btn btn-info m-2" onClick={reFetchIssue}>Fetch Data</button>
   </div>)
 }

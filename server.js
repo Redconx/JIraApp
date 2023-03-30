@@ -67,9 +67,9 @@ async function pushDataToDb() {
         ele.status,
         ele.duedate,
       ]);
-      console.log(issueArray);
+      // console.log(issueArray);
       issueArray.map((ele) => {
-        console.log(ele);
+        // console.log(ele);
         let sql1 = "INSERT INTO issues VALUES ($1,$2,$3,$4,$5,$6)";
         client.query(sql1, ele, function (err, result) {});
       });
@@ -79,8 +79,26 @@ async function pushDataToDb() {
   }
 }
 
+const paginate = (items, page , perPage ) => {
+    const offset = perPage * (page - 1);
+    const totalPages = Math.ceil(items.length / perPage);
+    const paginatedItems = items.slice(offset, perPage * page);
+  
+    return {
+        previousPage: page - 1 ? page - 1 : null,
+        nextPage: (totalPages > page) ? page + 1 : null,
+        total: items.length,
+        totalPages: totalPages,
+        items: paginatedItems
+    };
+  };
+
+
+
 app.get("/issues", async function (req, res) {
-  console.log("hi");
+  
+  const { page = 1, limit = 4 } = req.query;
+  console.log(page)
   try {
     let response = await axios.get(URL1, {
       headers: {
@@ -89,7 +107,8 @@ app.get("/issues", async function (req, res) {
       },
     });
     pushDataToDb();
-    res.send(response.data.issues);
+    const issueArr=paginate(response.data.issues,+page,+limit)
+    res.send(issueArr);
   } catch (error) {
     console.log(error.message, "error");
   }
